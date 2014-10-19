@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 struct aliasNode {
     char alias[64];
@@ -57,10 +58,19 @@ int main() {
     // Setup CTRL+C trap
     signal(SIGINT, sigintHandler);
 
-    // Build linked list of aliases from .nsh_alias
+    // Check for ~/.nsh_alias
     strcpy(ahome, home);
-    fp = fopen(strcat(ahome, "/.nsh_alias"), "a+");
+    strcat(ahome, "/.nsh_alias");
+    // If the alias file doesn't exist build skeleton file
+    if (access(ahome, F_OK) == -1) {
+        fp = fopen(ahome, "a+"); 
+        fputs("###\n#\n# nsh aliases\n#\n###\n#\n\nalias ll=\'ls -lAh\'\n", fp);
+        rewind(fp);
+    }
+    // Otherwise open for normal reading
+    else { fp = fopen(ahome, "r"); }
     if (fp == NULL) { exit(EXIT_FAILURE); }
+    // Build linked lists of aliases
     while ((read = getline(&tmp, &len, fp)) != -1) {
         if (strncmp(tmp, "alias", strlen("alias")) == 0) {
             newAlias = (Alias *) malloc(sizeof(Alias));
@@ -72,7 +82,7 @@ int main() {
             aliasListInsert(&alias_list, newAlias);
         } 
     }
-    memset(buffer, 0, sizeof(buffer));
+    fclose(fp);
 
     /*  Ye Olde Loop of Brief Eternity  */
     while (1) {
