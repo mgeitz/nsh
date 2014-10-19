@@ -104,12 +104,14 @@ int main() {
         if (strcmp(argv[0], "\0") == 0) {  }
         // cd and chdir
         else if (strcmp(argv[0], "cd") == 0 || strcmp(argv[0], "chdir") == 0) { 
+            // If cd has an argument check for ~
             if (argv[1]) {
                 if (strncmp(argv[1], "~", 1) == 0) {
                     memmove(argv[1] + strlen(home), argv[1] + 1, strlen(argv[1]));
                     memmove(argv[1], home, strlen(home));
                 }
             }
+            // If cd has no arguments use home
             else { argv[1] = home; }
             chdir(argv[1]);
         }
