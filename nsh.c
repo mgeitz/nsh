@@ -84,9 +84,7 @@ int main() {
         // Read stdin until newline or eof read
         i = 0;
         buffer[i] = getc(stdin);
-        while (buffer[i] != '\n' && buffer[i] != EOF) { 
-            buffer[++i] = getc(stdin); 
-            }
+        while (buffer[i] != '\n' && buffer[i] != EOF) { buffer[++i] = getc(stdin); }
         // If EOF, time to leave.
         if (buffer[i] == EOF) { printf("\e[1m\x1b[32mBuh bye.\x1b[0m\e[0m\n"); exit(0); }
         // Otherwise, replace '\n' with '\0'
@@ -106,10 +104,13 @@ int main() {
         if (strcmp(argv[0], "\0") == 0) {  }
         // cd and chdir
         else if (strcmp(argv[0], "cd") == 0 || strcmp(argv[0], "chdir") == 0) { 
-            if (strncmp(argv[1], "~", 1) == 0) {
-                memmove(argv[1] + strlen(home), argv[1] + 1, strlen(argv[1]));
-                memmove(argv[1], home, strlen(home));
+            if (argv[1]) {
+                if (strncmp(argv[1], "~", 1) == 0) {
+                    memmove(argv[1] + strlen(home), argv[1] + 1, strlen(argv[1]));
+                    memmove(argv[1], home, strlen(home));
+                }
             }
+            else { argv[1] = home; }
             chdir(argv[1]);
         }
         // Alias print command
@@ -123,6 +124,7 @@ int main() {
             // Make child process, execute argv
             executeCommand(argv);
         }
+        // Clear buffer
         memset(buffer, 0, sizeof(buffer));
     }
     exit(0);
@@ -193,10 +195,12 @@ void printHelp() {
 
 /* Insert alias object into alias list */
 void aliasListInsert(Alias **head, Alias *newAlias) {
+    // Base case of empty list
     if (*head == NULL) {
         newAlias->next = *head;
         *head = newAlias;
     }
+    // Otherwise find end of list to append
     else {
         Alias *curr = *head;
         while (curr->next != NULL) { curr = curr->next; }
