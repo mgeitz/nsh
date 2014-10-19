@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
-//#include <sys/types.h>
 
 struct aliasNode {
     char alias[64];
@@ -36,6 +35,7 @@ int main() {
     char *argv[64];                  // Initialize char pointer array for args
     char *a[2];                      // For alias and command from .nsh_alias
     char host[64];                   // Store hostname
+    char ahome[64];                  // Store hostname
     char *home, *user, *tmp, *t;     // Some needed char pointers
     int i;                           //
     size_t len = 0;                  // For read
@@ -58,7 +58,8 @@ int main() {
     signal(SIGINT, sigintHandler);
 
     // Build linked list of aliases from .nsh_alias
-    fp = fopen(strcat(home, "/.nsh_alias"), "a+");
+    strcpy(ahome, home);
+    fp = fopen(strcat(ahome, "/.nsh_alias"), "a+");
     if (fp == NULL) { exit(EXIT_FAILURE); }
     while ((read = getline(&tmp, &len, fp)) != -1) {
         if (strncmp(tmp, "alias", strlen("alias")) == 0) {
