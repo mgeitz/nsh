@@ -158,18 +158,24 @@ void aliasCheck(Alias **head, char *buffer) {
         curr = curr->next;
     }
     // Append --color to all ls commands, may be debian specific?
-    if (strncmp(buffer, "ls", strlen("ls")) == 0) { memmove(buffer + strlen(buffer), " --color", strlen(" --color")); }
+    if (strncmp(buffer, "ls", strlen("ls")) == 0) { memmove(buffer + strlen(buffer), " --color\0", strlen(" --color\0")); }
 }
 
 
 /* Print that fancy prompt. */
 void printPrompt(char *user, char *host, char *home, char *cwd) {
+    // Replace home in cwd with ~
     if (strncmp(cwd, home, sizeof(home)) == 0) {
         memmove(cwd + 1, cwd + strlen(home), strlen(cwd));
-        cwd[0] = '~';
+        memmove(cwd, "~", 1);
     }
-    if (strcmp(user, "root") == 0) { printf("\e[1m\x1b[31m%s\x1b[34m %s \x1b[35m> \x1b[0m\e[0m", host, cwd); }
-    else { printf("\e[1m\x1b[32m%s@\x1b[32m%s\x1b[34m %s \x1b[36m> \x1b[0m\e[0m", user, host, cwd); }
+    // Shorten cwd if too long
+    if (strlen(cwd) > 48) {
+        memmove(cwd + 2, cwd + strlen(cwd) - 48, 49);
+        memmove(cwd, "..", 2);
+    }
+    // Print prompt
+    printf("\e[1m\x1b[32m%s@\x1b[32m%s\x1b[34m %s \x1b[36m> \x1b[0m\e[0m", user, host, cwd);
 }
 
 
@@ -189,11 +195,7 @@ void executeCommand(char **argv) {
 
 
 /* Handle SIGINT (CTRL+C) */
-void sigintHandler(int sig_num)
-{
-    printf("\b\b  \b\b");
-    fflush(stdout);
-}
+void sigintHandler(int sig_num) { printf("\b\b  \b\b"); fflush(stdout); }
 
 
 /* Print out some helpful stuff maybe */
