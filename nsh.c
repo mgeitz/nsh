@@ -31,17 +31,17 @@ void aliasFind(Alias **head, char *arg);
 
 int main() {
 
-    char buffer[1024];               // Store one line of input
+    char buffer[1024];               // Store one line of stdin
     char cwd[1024];                  // Store current working directory
     char *argv[64];                  // Initialize char pointer array for args
     char *a[2];                      // For alias and command from .nsh_alias
     char host[64];                   // Store hostname
-    char ahome[64];                  // Store hostname
+    char ahome[64];                  // Store alias file path
     char *home, *user, *tmp, *t;     // Some needed char pointers
-    int i;                           //
-    size_t len = 0;                  // For read
-    ssize_t read;                    // For read
-    FILE *fp;                        // For read
+    int i;                           // For counting things
+    size_t len = 0;                  // For file read/write
+    ssize_t read;                    // For file read/write
+    FILE *fp;                        // For file read/write
 
     // Get home dir, remove last slash
     home = getenv("HOME");
@@ -126,7 +126,7 @@ int main() {
             chdir(argv[1]);
         }
         // Alias print command
-        else if (strcmp(argv[0], "alias") == 0) { if (argv[1]) { aliasFind(&alias_list, argv[1]); } }
+        else if (strcmp(argv[0], "alias") == 0) { if (argv[1]) { aliasFind(&alias_list, argv[1]); } else { aliasFind(&alias_list, "alias"); } }
         // Quit commands and other
         else if (strcmp(argv[0], "exit") == 0 || strcmp(argv[0], "logout") == 0 || 
                  (strcmp(argv[0], ":q") == 0) || strcmp(argv[0], "quit") == 0) { exit(0); }
@@ -146,9 +146,10 @@ int main() {
 /* Print corresponding command for alias arg passed in */
 void aliasFind(Alias **head, char *arg) {
     Alias *curr = *head;
-    while (curr != NULL && strcmp(curr->alias, arg) != 0) { curr = curr->next; }
+    while (curr != NULL && strcmp(curr->alias, arg) != 0) { if (strcmp(arg, "alias") == 0) { printf("\e[1m%s:\e[0m %s\n", curr->alias, curr->cmd); } curr = curr->next; }
     if (curr != NULL) { printf("\e[1m%s:\e[0m %s\n", curr->alias, curr->cmd); }
 }
+
 
 /* Check for alias, mutate buffer accordingly. */
 void aliasCheck(Alias **head, char *buffer) {
