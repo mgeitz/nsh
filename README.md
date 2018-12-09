@@ -1,3 +1,15 @@
-# No Shell
+# Nameless Shell
 
-Not really much of a shell
+## Features
+
+* Aliases
+* Says goodbye
+
+## Compiling
+
+```sh
+$ make all
+```
+
+### Contributing
+View the section on [how to contribute](./CONTRIBUTING.md)
